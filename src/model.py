@@ -53,7 +53,10 @@ class BaseModel(pl.LightningModule):
         super().__init__()
        
         self.initial_ln = nn.LayerNorm(embed_dim)
-        self.lin = nn.Linear(embed_dim, 256)
+        # self.lin = nn.Linear(embed_dim, 256)
+        self.lin1 = nn.Linear(embed_dim, 512)  # New layer
+        self.lin2 = nn.Linear(512, 256)         # New layer
+        self.lin3 = nn.Linear(256, 256)         # New layer
         self.attn_head = AttentionHead(256, 1)
         self.clf_head = nn.Linear(256, 11)
         self.kld = nn.KLDivLoss(reduction="batchmean")
@@ -61,7 +64,12 @@ class BaseModel(pl.LightningModule):
 
     def forward(self, embedding, lens, non_mask):
         x = self.initial_ln(embedding)
-        x = self.lin(x)
+        # x = self.lin(x)
+        x = self.lin1(x)  # New layer
+        x = nn.ReLU()(x)  # New activation function
+        x = self.lin2(x)  # New layer
+        x = nn.ReLU()(x)  # New activation function
+        x = self.lin3(x)  # New layer
         x_pool, x_attns = self.attn_head(x, non_mask, lens)
         x_pred = self.clf_head(x_pool)
         #print(x_pred, x_attns)
@@ -69,7 +77,12 @@ class BaseModel(pl.LightningModule):
 
     def predict(self, embedding, lens, non_mask):
         x = self.initial_ln(embedding)
-        x = self.lin(x)
+        # x = self.lin(x)
+        x = self.lin1(x)  # New layer
+        x = nn.ReLU()(x)  # New activation function
+        x = self.lin2(x)  # New layer
+        x = nn.ReLU()(x)  # New activation function
+        x = self.lin3(x)  # New layer
         x_pool, x_attns = self.attn_head(x, non_mask, lens)
         x_pred = self.clf_head(x_pool)
         #print(x_pred, x_attns)
